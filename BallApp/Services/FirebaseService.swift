@@ -135,7 +135,7 @@ class FirebaseService: ObservableObject {
         if let lastServeIndex = match.events.lastIndex(where: { $0.type == .serve }) {
             // Check if there was any hit after the serve
             let eventsAfterServe = match.events.suffix(from: lastServeIndex + 1)
-            return eventsAfterServe.contains(where: { $0.type == .spike || $0.type == .block })
+            return eventsAfterServe.contains(where: { $0.type == .forehand || $0.type == .backhand })
         }
 
         return false
@@ -153,8 +153,8 @@ class FirebaseService: ObservableObject {
         if match.events.last?.type == .scorePoint {
             // Get the event before the score
             let previousEvent = match.events[match.events.count - 2]
-            // Check if it was a hit (spike or block)
-            return previousEvent.type == .spike || previousEvent.type == .block
+            // Check if it was a hit (forehand or backhand)
+            return previousEvent.type == .forehand || previousEvent.type == .backhand
         }
 
         return true

@@ -116,8 +116,8 @@ struct MatchEvent: Identifiable, Codable, Hashable {
 
 enum EventType: String, Codable {
     case serve
-    case spike
-    case block
+    case forehand
+    case backhand
     case scorePoint
     case error
 }

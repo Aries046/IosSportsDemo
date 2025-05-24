@@ -377,10 +377,10 @@ struct EventRow: View {
         switch event.type {
         case .serve:
             return "Serve"
-        case .spike:
-            return "Spike"
-        case .block:
-            return "Block"
+        case .forehand:
+            return "Forehand"
+        case .backhand:
+            return "Backhand"
         case .scorePoint:
             return "Score"
         case .error:
@@ -411,12 +411,12 @@ struct EventRow: View {
                 teamA: "Team A",
                 teamB: "Team B",
                 playersA: [
-                    Player(id: "1", name: "John Smith", position: "Setter"),
-                    Player(id: "2", name: "Mike Johnson", position: "Middle Blocker")
+                    Player(id: "1", name: "John Smith", position: "Attacker"),
+                    Player(id: "2", name: "Mike Johnson", position: "Defender")
                 ],
                 playersB: [
-                    Player(id: "3", name: "David Brown", position: "Outside Hitter"),
-                    Player(id: "4", name: "James Wilson", position: "Libero")
+                    Player(id: "3", name: "David Brown", position: "Attacker"),
+                    Player(id: "4", name: "James Wilson", position: "Blocker")
                 ],
                 score: Score(teamA: 5, teamB: 3),
                 events: [],

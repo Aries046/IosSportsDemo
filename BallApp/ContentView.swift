@@ -22,7 +22,7 @@ struct ContentView: View {
         VStack {
                     if matches.isEmpty && !isLoading {
                         VStack(spacing: 20) {
-                            Image(systemName: "volleyball")
+                            Image(systemName: "table.tennis.paddle.ball")
                                 .font(.system(size: 64))
                                 .foregroundColor(.blue)
 
@@ -75,7 +75,7 @@ struct ContentView: View {
                         .scaleEffect(1.5)
                 }
             }
-            .navigationTitle("Volleyball Match Records")
+            .navigationTitle("Table Tennis Match Records")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {

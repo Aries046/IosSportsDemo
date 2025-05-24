@@ -17,11 +17,11 @@ struct AddPlayerView: View {
     let onPlayerAdded: () -> Void
 
     @State private var playerName = ""
-    @State private var playerPosition = "Setter"
+    @State private var playerPosition = "Attacker"
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    private let positions = ["Setter", "Outside Hitter", "Middle Blocker", "Opposite Hitter", "Libero"]
+    private let positions = ["Attacker", "Defender", "All-round", "Chopper", "Blocker"]
 
     var body: some View {
         NavigationView {

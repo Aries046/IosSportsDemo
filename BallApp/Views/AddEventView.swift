@@ -57,8 +57,8 @@ struct AddEventView: View {
                 Section(header: Text("Action Type")) {
                     Picker("Action", selection: $selectedEventType) {
                         Text("Serve").tag(EventType.serve)
-                        Text("Spike").tag(EventType.spike)
-                        Text("Block").tag(EventType.block)
+                        Text("Forehand").tag(EventType.forehand)
+                        Text("Backhand").tag(EventType.backhand)
                         Text("Score").tag(EventType.scorePoint)
                         Text("Error").tag(EventType.error)
                     }
@@ -120,7 +120,7 @@ struct AddEventView: View {
         }
 
         // Validate rules
-        if selectedEventType == .spike || selectedEventType == .block {
+        if selectedEventType == .forehand || selectedEventType == .backhand {
             if !validateHitAction() {
                 validationError = "There must be a serve action before recording a hit"
                 return
@@ -187,7 +187,7 @@ struct AddEventView: View {
         // Find the last action
         if let lastEvent = match.events.last {
             // Check if the last action was a hit
-            return lastEvent.type == .spike || lastEvent.type == .block
+            return lastEvent.type == .forehand || lastEvent.type == .backhand
         }
 
         return false
@@ -202,12 +202,12 @@ struct AddEventView: View {
             teamA: "Team A",
             teamB: "Team B",
             playersA: [
-                Player(id: "1", name: "John Smith", position: "Setter"),
-                Player(id: "2", name: "Mike Johnson", position: "Middle Blocker")
+                Player(id: "1", name: "John Smith", position: "Attacker"),
+                Player(id: "2", name: "Mike Johnson", position: "Defender")
             ],
             playersB: [
-                Player(id: "3", name: "David Brown", position: "Outside Hitter"),
-                Player(id: "4", name: "James Wilson", position: "Libero")
+                Player(id: "3", name: "David Brown", position: "Attacker"),
+                Player(id: "4", name: "James Wilson", position: "Blocker")
             ],
             score: Score(teamA: 0, teamB: 0),
             events: [],
