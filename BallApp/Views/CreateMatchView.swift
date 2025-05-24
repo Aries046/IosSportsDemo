@@ -21,10 +21,10 @@ struct CreateMatchView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("比赛队伍")) {
-                    TextField("A队名称", text: $teamA)
+                Section(header: Text("Teams")) {
+                    TextField("Team A Name", text: $teamA)
                         .autocapitalization(.words)
-                    TextField("B队名称", text: $teamB)
+                    TextField("Team B Name", text: $teamB)
                         .autocapitalization(.words)
                 }
 
@@ -41,18 +41,18 @@ struct CreateMatchView: View {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
                         } else {
-                            Text("创建比赛")
+                            Text("Create Match")
                         }
                     }
                     .disabled(teamA.isEmpty || teamB.isEmpty || isLoading)
                     .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
-            .navigationTitle("创建新比赛")
+            .navigationTitle("Create New Match")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
@@ -62,7 +62,7 @@ struct CreateMatchView: View {
 
     private func createMatch() {
         guard !teamA.isEmpty, !teamB.isEmpty else {
-            errorMessage = "请输入两支队伍的名称"
+            errorMessage = "Please enter names for both teams"
             return
         }
 
@@ -84,7 +84,7 @@ struct CreateMatchView: View {
             } catch {
                 DispatchQueue.main.async {
                     isLoading = false
-                    errorMessage = "创建比赛失败: \(error.localizedDescription)"
+                    errorMessage = "Failed to create match: \(error.localizedDescription)"
                 }
             }
         }

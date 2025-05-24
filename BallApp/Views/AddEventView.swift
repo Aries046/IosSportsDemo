@@ -26,8 +26,8 @@ struct AddEventView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("选择队伍")) {
-                    Picker("队伍", selection: $isTeamA) {
+                Section(header: Text("Select Team")) {
+                    Picker("Team", selection: $isTeamA) {
                         Text(match.teamA).tag(true)
                         Text(match.teamB).tag(false)
                     }
@@ -40,13 +40,13 @@ struct AddEventView: View {
                     }
                 }
 
-                Section(header: Text("选择球员")) {
+                Section(header: Text("Select Player")) {
                     if availablePlayers.isEmpty {
-                        Text("没有可用球员")
+                        Text("No available players")
                             .foregroundColor(.secondary)
                     } else {
-                        Picker("球员", selection: $selectedPlayer) {
-                            Text("请选择球员").tag(nil as Player?)
+                        Picker("Player", selection: $selectedPlayer) {
+                            Text("Please select a player").tag(nil as Player?)
                             ForEach(availablePlayers) { player in
                                 Text(player.name).tag(player as Player?)
                             }
@@ -54,19 +54,19 @@ struct AddEventView: View {
                     }
                 }
 
-                Section(header: Text("动作类型")) {
-                    Picker("动作", selection: $selectedEventType) {
-                        Text("发球").tag(EventType.serve)
-                        Text("正手击球").tag(EventType.forehand)
-                        Text("反手击球").tag(EventType.backhand)
-                        Text("得分").tag(EventType.scorePoint)
-                        Text("失误").tag(EventType.error)
+                Section(header: Text("Action Type")) {
+                    Picker("Action", selection: $selectedEventType) {
+                        Text("Serve").tag(EventType.serve)
+                        Text("Spike").tag(EventType.spike)
+                        Text("Block").tag(EventType.block)
+                        Text("Score").tag(EventType.scorePoint)
+                        Text("Error").tag(EventType.error)
                     }
                     .pickerStyle(SegmentedPickerStyle())
                 }
 
-                Section(header: Text("备注")) {
-                    TextField("可选", text: $description)
+                Section(header: Text("Notes")) {
+                    TextField("Optional", text: $description)
                         .autocapitalization(.sentences)
                 }
 
@@ -90,18 +90,18 @@ struct AddEventView: View {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
                         } else {
-                            Text("记录动作")
+                            Text("Record Action")
                         }
                     }
                     .disabled(selectedPlayer == nil || isLoading)
                     .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
-            .navigationTitle("记录比赛动作")
+            .navigationTitle("Record Match Action")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
@@ -115,21 +115,21 @@ struct AddEventView: View {
 
     private func addEvent() {
         guard let player = selectedPlayer else {
-            validationError = "请选择一名球员"
+            validationError = "Please select a player"
             return
         }
 
-        // 验证规则
-        if selectedEventType == .forehand || selectedEventType == .backhand {
+        // Validate rules
+        if selectedEventType == .spike || selectedEventType == .block {
             if !validateHitAction() {
-                validationError = "必须先有发球动作才能记录击球"
+                validationError = "There must be a serve action before recording a hit"
                 return
             }
         }
 
         if selectedEventType == .scorePoint {
             if !validateScoreAction() {
-                validationError = "必须在击球动作后才能记录得分"
+                validationError = "A score can only be recorded after a hit action"
                 return
             }
         }
@@ -157,37 +157,37 @@ struct AddEventView: View {
                         dismiss()
                     }
                 } else {
-                    throw NSError(domain: "EventError", code: 404, userInfo: [NSLocalizedDescriptionKey: "比赛ID无效"])
+                    throw NSError(domain: "EventError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Invalid match ID"])
                 }
             } catch {
                 DispatchQueue.main.async {
                     isLoading = false
-                    errorMessage = "添加事件失败: \(error.localizedDescription)"
+                    errorMessage = "Failed to add event: \(error.localizedDescription)"
                 }
             }
         }
     }
 
     private func validateHitAction() -> Bool {
-        // 规则1: 必须先有发球动作才能记录击球
+        // Rule 1: Only allow hit actions after a serve
         if match.events.isEmpty {
             return false
         }
 
-        // 检查是否有发球动作
+        // Check if there is a serve action
         return match.events.contains(where: { $0.type == .serve })
     }
 
     private func validateScoreAction() -> Bool {
-        // 规则2: 必须在击球动作后才能记录得分
+        // Rule 2: Score can only happen after a hit
         if match.events.isEmpty {
             return false
         }
 
-        // 找到最后一个动作
+        // Find the last action
         if let lastEvent = match.events.last {
-            // 检查最后一个动作是否是击球
-            return lastEvent.type == .forehand || lastEvent.type == .backhand
+            // Check if the last action was a hit
+            return lastEvent.type == .spike || lastEvent.type == .block
         }
 
         return false
@@ -199,15 +199,15 @@ struct AddEventView: View {
         firebaseService: FirebaseService(),
         match: Match(
             id: "preview",
-            teamA: "铁军队",
-            teamB: "蓝鲸队",
+            teamA: "Team A",
+            teamB: "Team B",
             playersA: [
-                Player(id: "1", name: "王刚", position: "主攻"),
-                Player(id: "2", name: "李明", position: "副攻")
+                Player(id: "1", name: "John Smith", position: "Setter"),
+                Player(id: "2", name: "Mike Johnson", position: "Middle Blocker")
             ],
             playersB: [
-                Player(id: "3", name: "张伟", position: "主攻"),
-                Player(id: "4", name: "赵强", position: "副攻")
+                Player(id: "3", name: "David Brown", position: "Outside Hitter"),
+                Player(id: "4", name: "James Wilson", position: "Libero")
             ],
             score: Score(teamA: 0, teamB: 0),
             events: [],

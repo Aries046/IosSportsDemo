@@ -17,20 +17,20 @@ struct AddPlayerView: View {
     let onPlayerAdded: () -> Void
 
     @State private var playerName = ""
-    @State private var playerPosition = "主攻"
+    @State private var playerPosition = "Setter"
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    private let positions = ["主攻", "副攻", "二传", "自由人", "接应"]
+    private let positions = ["Setter", "Outside Hitter", "Middle Blocker", "Opposite Hitter", "Libero"]
 
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("添加球员到 \(teamName)")) {
-                    TextField("球员姓名", text: $playerName)
+                Section(header: Text("Add Player to \(teamName)")) {
+                    TextField("Player Name", text: $playerName)
                         .autocapitalization(.words)
 
-                    Picker("位置", selection: $playerPosition) {
+                    Picker("Position", selection: $playerPosition) {
                         ForEach(positions, id: \.self) { position in
                             Text(position).tag(position)
                         }
@@ -50,18 +50,18 @@ struct AddPlayerView: View {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
                         } else {
-                            Text("添加球员")
+                            Text("Add Player")
                         }
                     }
                     .disabled(playerName.isEmpty || isLoading)
                     .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
-            .navigationTitle("添加球员")
+            .navigationTitle("Add Player")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
@@ -71,7 +71,7 @@ struct AddPlayerView: View {
 
     private func addPlayer() {
         guard !playerName.isEmpty else {
-            errorMessage = "请输入球员姓名"
+            errorMessage = "Please enter player name"
             return
         }
 
@@ -91,7 +91,7 @@ struct AddPlayerView: View {
             } catch {
                 DispatchQueue.main.async {
                     isLoading = false
-                    errorMessage = "添加球员失败: \(error.localizedDescription)"
+                    errorMessage = "Failed to add player: \(error.localizedDescription)"
                 }
             }
         }
@@ -102,7 +102,7 @@ struct AddPlayerView: View {
     AddPlayerView(
         firebaseService: FirebaseService(),
         matchId: "preview",
-        teamName: "铁军队",
+        teamName: "Team A",
         isTeamA: true,
         onPlayerAdded: {}
     )

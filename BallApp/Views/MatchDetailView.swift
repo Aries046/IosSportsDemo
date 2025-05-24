@@ -20,16 +20,16 @@ struct MatchDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // 比分板
+                // Scoreboard
                 scoreboardSection
 
-                // 状态控制
+                // Status controls
                 matchStatusSection
 
-                // 球员列表
+                // Player lists
                 playersSection
 
-                // 比赛动作记录
+                // Match action records
                 eventsSection
             }
             .padding()
@@ -69,9 +69,9 @@ struct MatchDetailView: View {
             set: { if !$0 { errorMessage = nil } }
         )) {
             Alert(
-                title: Text("错误"),
-                message: Text(errorMessage ?? "发生未知错误"),
-                dismissButton: .default(Text("确定"))
+                title: Text("Error"),
+                message: Text(errorMessage ?? "An unknown error occurred"),
+                dismissButton: .default(Text("OK"))
             )
         }
         .overlay {
@@ -89,7 +89,7 @@ struct MatchDetailView: View {
 
     private var scoreboardSection: some View {
         VStack {
-            Text("比分")
+            Text("Score")
                 .font(.headline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 5)
@@ -121,7 +121,7 @@ struct MatchDetailView: View {
 
     private var matchStatusSection: some View {
         VStack {
-            Text("比赛状态")
+            Text("Match Status")
                 .font(.headline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 5)
@@ -130,7 +130,7 @@ struct MatchDetailView: View {
                 switch match.status {
                 case .created:
                     Button(action: startMatch) {
-                        Label("开始比赛", systemImage: "play.fill")
+                        Label("Start Match", systemImage: "play.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
@@ -138,14 +138,14 @@ struct MatchDetailView: View {
 
                 case .inProgress:
                     Button(action: endMatch) {
-                        Label("结束比赛", systemImage: "stop.fill")
+                        Label("End Match", systemImage: "stop.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.red)
 
                 case .finished:
-                    Text("比赛已结束")
+                    Text("Match Completed")
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -158,7 +158,7 @@ struct MatchDetailView: View {
 
     private var playersSection: some View {
         VStack {
-            Text("球员")
+            Text("Players")
                 .font(.headline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 5)
@@ -183,7 +183,7 @@ struct MatchDetailView: View {
                     }
 
                     if match.playersA.isEmpty {
-                        Text("没有球员")
+                        Text("No players")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .padding(.vertical, 10)
@@ -217,7 +217,7 @@ struct MatchDetailView: View {
                     }
 
                     if match.playersB.isEmpty {
-                        Text("没有球员")
+                        Text("No players")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .padding(.vertical, 10)
@@ -237,13 +237,13 @@ struct MatchDetailView: View {
 
     private var eventsSection: some View {
         VStack {
-            Text("比赛记录")
+            Text("Match Records")
                 .font(.headline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 5)
 
             if match.events.isEmpty {
-                Text("暂无比赛记录")
+                Text("No match records yet")
                     .foregroundColor(.secondary)
                     .padding()
             } else {
@@ -260,7 +260,7 @@ struct MatchDetailView: View {
 
     private func startMatch() {
         guard match.playersA.count >= 2 && match.playersB.count >= 2 else {
-            errorMessage = "每队至少需要2名球员才能开始比赛"
+            errorMessage = "Each team needs at least 2 players to start the match"
             return
         }
 
@@ -273,7 +273,7 @@ struct MatchDetailView: View {
 
     private func updateMatchStatus(_ status: MatchStatus) {
         guard let id = match.id else {
-            errorMessage = "比赛ID无效"
+            errorMessage = "Invalid match ID"
             return
         }
 
@@ -286,7 +286,7 @@ struct MatchDetailView: View {
             } catch {
                 DispatchQueue.main.async {
                     isLoading = false
-                    errorMessage = "更新比赛状态失败: \(error.localizedDescription)"
+                    errorMessage = "Failed to update match status: \(error.localizedDescription)"
                 }
             }
         }
@@ -307,7 +307,7 @@ struct MatchDetailView: View {
             } catch {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    self.errorMessage = "获取比赛信息失败: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to get match information: \(error.localizedDescription)"
                 }
             }
         }
@@ -376,15 +376,15 @@ struct EventRow: View {
     private var actionText: String {
         switch event.type {
         case .serve:
-            return "发球"
-        case .forehand:
-            return "正手击球"
-        case .backhand:
-            return "反手击球"
+            return "Serve"
+        case .spike:
+            return "Spike"
+        case .block:
+            return "Block"
         case .scorePoint:
-            return "得分"
+            return "Score"
         case .error:
-            return "失误"
+            return "Error"
         }
     }
 
@@ -408,15 +408,15 @@ struct EventRow: View {
         MatchDetailView(
             match: Match(
                 id: "preview",
-                teamA: "铁军队",
-                teamB: "蓝鲸队",
+                teamA: "Team A",
+                teamB: "Team B",
                 playersA: [
-                    Player(id: "1", name: "王刚", position: "主攻"),
-                    Player(id: "2", name: "李明", position: "副攻")
+                    Player(id: "1", name: "John Smith", position: "Setter"),
+                    Player(id: "2", name: "Mike Johnson", position: "Middle Blocker")
                 ],
                 playersB: [
-                    Player(id: "3", name: "张伟", position: "主攻"),
-                    Player(id: "4", name: "赵强", position: "副攻")
+                    Player(id: "3", name: "David Brown", position: "Outside Hitter"),
+                    Player(id: "4", name: "James Wilson", position: "Libero")
                 ],
                 score: Score(teamA: 5, teamB: 3),
                 events: [],
