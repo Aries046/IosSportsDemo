@@ -69,6 +69,11 @@ struct Player: Identifiable, Codable, Hashable {
         // Otherwise compare all properties
         return lhs.name == rhs.name && lhs.position == rhs.position
     }
+
+    // Add a computed property to get display name
+    var displayName: String {
+        return name
+    }
 }
 
 struct MatchEvent: Identifiable, Codable, Hashable {

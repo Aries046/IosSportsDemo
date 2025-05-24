@@ -54,14 +54,22 @@ struct MatchDetailView: View {
                 matchId: match.id ?? "",
                 teamName: selectedTeamForPlayer ? match.teamA : match.teamB,
                 isTeamA: selectedTeamForPlayer,
-                onPlayerAdded: { refreshMatch() }
+                onPlayerAdded: {
+                    Task {
+                        await refreshMatch()
+                    }
+                }
             )
         }
         .sheet(isPresented: $showingAddEvent) {
             AddEventView(
                 firebaseService: firebaseService,
                 match: match,
-                onEventAdded: { refreshMatch() }
+                onEventAdded: {
+                    Task {
+                        await refreshMatch()
+                    }
+                }
             )
         }
         .alert(isPresented: Binding<Bool>(
@@ -83,6 +91,14 @@ struct MatchDetailView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 }
                 .ignoresSafeArea()
+            }
+        }
+        .onAppear {
+            // Refresh match data when view appears
+            if let id = match.id {
+                Task {
+                    await refreshMatch()
+                }
             }
         }
     }
@@ -165,7 +181,7 @@ struct MatchDetailView: View {
 
             HStack(alignment: .top, spacing: 20) {
                 // Team A Players
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         Text(match.teamA)
                             .font(.headline)
@@ -181,6 +197,7 @@ struct MatchDetailView: View {
                             .buttonStyle(.borderless)
                         }
                     }
+                    .padding(.bottom, 4)
 
                     if match.playersA.isEmpty {
                         Text("No players")
@@ -188,8 +205,9 @@ struct MatchDetailView: View {
                             .foregroundColor(.secondary)
                             .padding(.vertical, 10)
                     } else {
-                        ForEach(match.playersA) { player in
-                            PlayerRow(player: player)
+                        ForEach(Array(match.playersA.enumerated()), id: \.offset) { index, player in
+                            PlayerRow(player: player, number: index + 1)
+                                .padding(.vertical, 4)
                         }
                     }
                 }
@@ -199,7 +217,7 @@ struct MatchDetailView: View {
                 .cornerRadius(8)
 
                 // Team B Players
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         Text(match.teamB)
                             .font(.headline)
@@ -215,6 +233,7 @@ struct MatchDetailView: View {
                             .buttonStyle(.borderless)
                         }
                     }
+                    .padding(.bottom, 4)
 
                     if match.playersB.isEmpty {
                         Text("No players")
@@ -222,8 +241,9 @@ struct MatchDetailView: View {
                             .foregroundColor(.secondary)
                             .padding(.vertical, 10)
                     } else {
-                        ForEach(match.playersB) { player in
-                            PlayerRow(player: player)
+                        ForEach(Array(match.playersB.enumerated()), id: \.offset) { index, player in
+                            PlayerRow(player: player, number: index + 1)
+                                .padding(.vertical, 4)
                         }
                     }
                 }
@@ -292,23 +312,25 @@ struct MatchDetailView: View {
         }
     }
 
-    private func refreshMatch() {
+    private func refreshMatch() async {
         guard let id = match.id else { return }
 
-        isLoading = true
+        DispatchQueue.main.async {
+            self.isLoading = true
+        }
 
-        Task {
-            do {
-                let updatedMatch = try await firebaseService.getMatch(id: id)
-                DispatchQueue.main.async {
-                    self.match = updatedMatch
-                    self.isLoading = false
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    self.errorMessage = "Failed to get match information: \(error.localizedDescription)"
-                }
+        do {
+            let updatedMatch = try await firebaseService.getMatch(id: id)
+            DispatchQueue.main.async {
+                print("Refreshing UI with player data: TeamA=\(updatedMatch.playersA.map { $0.name })")
+                print("Refreshing UI with player data: TeamB=\(updatedMatch.playersB.map { $0.name })")
+                self.match = updatedMatch
+                self.isLoading = false
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.isLoading = false
+                self.errorMessage = "Failed to get match information: \(error.localizedDescription)"
             }
         }
     }
@@ -316,17 +338,29 @@ struct MatchDetailView: View {
 
 struct PlayerRow: View {
     let player: Player
+    let number: Int
 
     var body: some View {
-        HStack {
-            Text(player.name)
-                .font(.subheadline)
-            Spacer()
-            Text(player.position)
-                .font(.caption)
-                .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text("\(number)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(width: 20)
+
+                Text(player.displayName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+
+            HStack {
+                Spacer()
+                Text(player.position)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
-        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity)
     }
 }
 

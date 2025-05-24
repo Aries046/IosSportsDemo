@@ -79,14 +79,22 @@ struct AddPlayerView: View {
         errorMessage = nil
 
         let player = Player(name: playerName, position: playerPosition)
+        print("Preparing to add player: \(playerName), position: \(playerPosition)")
 
         Task {
             do {
-                try await firebaseService.addPlayer(to: matchId, player: player, isTeamA: isTeamA)
+                let addedPlayer = try await firebaseService.addPlayer(to: matchId, player: player, isTeamA: isTeamA)
+                print("Successfully added player: \(addedPlayer.name), ID: \(addedPlayer.id ?? "none")")
+
+                // Ensure we run onPlayerAdded before dismissing
                 DispatchQueue.main.async {
                     isLoading = false
                     onPlayerAdded()
-                    dismiss()
+
+                    // Small delay to ensure data is refreshed before dismissing
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        dismiss()
+                    }
                 }
             } catch {
                 DispatchQueue.main.async {

@@ -47,8 +47,8 @@ struct AddEventView: View {
                     } else {
                         Picker("Player", selection: $selectedPlayer) {
                             Text("Please select a player").tag(nil as Player?)
-                            ForEach(availablePlayers) { player in
-                                Text(player.name).tag(player as Player?)
+                            ForEach(Array(availablePlayers.enumerated()), id: \.offset) { index, player in
+                                Text("\(index + 1). \(player.displayName) (\(player.position))").tag(player as Player?)
                             }
                         }
                     }
@@ -141,7 +141,7 @@ struct AddEventView: View {
         let event = MatchEvent(
             type: selectedEventType,
             playerId: player.id ?? UUID().uuidString,
-            playerName: player.name,
+            playerName: player.displayName,
             teamId: isTeamA ? match.teamA : match.teamB,
             timestamp: Date(),
             description: description

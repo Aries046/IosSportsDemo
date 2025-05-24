@@ -47,6 +47,7 @@ class FirebaseService: ObservableObject {
             throw NSError(domain: "FirebaseError", code: 404, userInfo: [NSLocalizedDescriptionKey: "Match not found"])
         }
 
+        print("Retrieved match data from database: TeamA players=\(match.playersA.map { $0.name }), TeamB players=\(match.playersB.map { $0.name })")
         return match
     }
 
@@ -68,17 +69,32 @@ class FirebaseService: ObservableObject {
 
     // MARK: - Players
 
-    func addPlayer(to matchId: String, player: Player, isTeamA: Bool) async throws {
+    func addPlayer(to matchId: String, player: Player, isTeamA: Bool) async throws -> Player {
         let match = try await getMatch(id: matchId)
         var updatedMatch = match
 
+        // Create a player with ID if it doesn't have one
+        var updatedPlayer = player
+
+        // 强制生成新的唯一ID，确保不使用现有ID
+        updatedPlayer.id = UUID().uuidString
+
+        print("Adding player: \(updatedPlayer.name), position: \(updatedPlayer.position), ID: \(updatedPlayer.id ?? "none")")
+
         if isTeamA {
-            updatedMatch.playersA.append(player)
+            updatedMatch.playersA.append(updatedPlayer)
         } else {
-            updatedMatch.playersB.append(player)
+            updatedMatch.playersB.append(updatedPlayer)
         }
 
         try await db.collection("matches").document(matchId).setData(from: updatedMatch)
+
+        // 打印更新后的球员列表和ID
+        print("Updated player list: TeamA=\(updatedMatch.playersA.map { "\($0.name)" })")
+        print("Updated player list: TeamB=\(updatedMatch.playersB.map { "\($0.name)" })")
+
+        // Return the updated player with ID
+        return updatedPlayer
     }
 
     func removePlayer(from matchId: String, playerId: String, isTeamA: Bool) async throws {
