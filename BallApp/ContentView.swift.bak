@@ -22,18 +22,18 @@ struct ContentView: View {
         VStack {
                     if matches.isEmpty && !isLoading {
                         VStack(spacing: 20) {
-                            Image(systemName: "volleyball")
+                            Image(systemName: "table.tennis.paddle.ball")
                                 .font(.system(size: 64))
                                 .foregroundColor(.blue)
 
-                            Text("No Match Records")
+                            Text("没有比赛记录")
                                 .font(.title2)
                                 .foregroundColor(.secondary)
 
                             Button(action: {
                                 showingCreateMatch = true
                             }) {
-                                Text("Create New Match")
+                                Text("创建新比赛")
                                     .font(.headline)
                                     .foregroundColor(.white)
                                     .padding()
@@ -53,7 +53,7 @@ struct ContentView: View {
                                                 matchToDelete = match
                                                 showingDeleteConfirmation = true
                                             }) {
-                                                Label("Delete", systemImage: "trash")
+                                                Label("删除", systemImage: "trash")
                                             }
                                         }
                                         .onLongPressGesture {
@@ -75,7 +75,7 @@ struct ContentView: View {
                         .scaleEffect(1.5)
                 }
             }
-            .navigationTitle("Volleyball Match Records")
+            .navigationTitle("排球比赛记录")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -97,9 +97,9 @@ struct ContentView: View {
                     await loadMatches()
                 }
             }
-            .alert("Confirm Delete", isPresented: $showingDeleteConfirmation, presenting: matchToDelete) { match in
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+            .alert("确认删除", isPresented: $showingDeleteConfirmation, presenting: matchToDelete) { match in
+                Button("取消", role: .cancel) { }
+                Button("删除", role: .destructive) {
                     if let id = match.id {
                         Task {
                             do {
@@ -112,7 +112,7 @@ struct ContentView: View {
                     }
                 }
             } message: { match in
-                Text("Are you sure you want to delete match \"\(match.teamA) vs \(match.teamB)\"? This action cannot be undone.")
+                Text("确定要删除"\(match.teamA) vs \(match.teamB)"这场比赛吗？此操作不可撤销。")
             }
         }
     }
@@ -197,11 +197,11 @@ struct MatchRowView: View {
     private var statusText: String {
         switch match.status {
         case .created:
-            return "Pending"
+            return "待开始"
         case .inProgress:
-            return "In Progress"
+            return "进行中"
         case .finished:
-            return "Completed"
+            return "已结束"
         }
     }
 
