@@ -228,16 +228,16 @@ struct PlayerDetailView: View {
     }
 
     private func loadAvatar(from urlString: String) {
-        // 检查是否是本地URL或远程URL
+
         if urlString.hasPrefix("file://") {
-            // 从本地存储加载
+
             if let image = LocalDataStore.shared.loadPlayerAvatar(from: urlString) {
                 DispatchQueue.main.async {
                     self.avatarImage = image
                 }
             }
         } else {
-            // 从远程URL加载
+
             guard let url = URL(string: urlString) else { return }
 
             URLSession.shared.dataTask(with: url) { data, response, error in

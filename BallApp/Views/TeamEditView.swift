@@ -58,7 +58,7 @@ struct TeamEditView: View {
                             .overlay(Circle().stroke(Color.blue, lineWidth: 2))
                             .shadow(radius: 2)
 
-                            // 编辑按钮
+
                             PhotosPicker(selection: $selectedItem, matching: .images) {
                                 Image(systemName: "pencil.circle.fill")
                                     .font(.system(size: 24))
@@ -192,7 +192,6 @@ struct TeamEditView: View {
             do {
                 let teamId = try await firebaseService.saveTeam(updatedTeam)
 
-                // 上传新logo如果有选择的话
                 if let newLogoImage = newLogoImage, let imageData = newLogoImage.jpegData(compressionQuality: 0.8) {
                     _ = try await firebaseService.updateTeamLogo(teamId: teamId, imageData: imageData)
                 }

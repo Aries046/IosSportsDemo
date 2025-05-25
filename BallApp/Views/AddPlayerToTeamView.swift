@@ -154,7 +154,6 @@ struct AddPlayerToTeamView: View {
             do {
                 try await firebaseService.addPlayerToTeam(teamId: teamId, playerId: playerId)
 
-                // 同时在本地存储中添加关联
                 LocalDataStore.shared.addPlayerToTeam(playerId: playerId, teamId: teamId)
 
                 DispatchQueue.main.async {

@@ -17,24 +17,23 @@ struct TeamDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 顶部队伍信息
+
             teamHeaderSection
                 .padding(.bottom)
 
-            // 选项卡栏
             tabBarView
 
-            // 选项卡内容
+
             TabView(selection: $activeTab) {
-                // 队员标签页
+
                 playersTabView
                     .tag(0)
 
-                // 比赛标签页
+
                 matchesTabView
                     .tag(1)
 
-                // 统计标签页
+
                 statsTabView
                     .tag(2)
             }
@@ -57,7 +56,7 @@ struct TeamDetailView: View {
                 team: team,
                 logoImage: logoImage,
                 onTeamSaved: { _ in
-                    // 这里会刷新队伍数据
+
                 }
             )
         }
@@ -108,7 +107,7 @@ struct TeamDetailView: View {
     private var teamHeaderSection: some View {
         VStack(spacing: 15) {
             ZStack(alignment: .bottomTrailing) {
-                // 队伍Logo
+
                 Group {
                     if let logoImage = logoImage {
                         Image(uiImage: logoImage)
@@ -136,7 +135,7 @@ struct TeamDetailView: View {
                 .overlay(Circle().stroke(Color.blue, lineWidth: 2))
                 .shadow(radius: 3)
 
-                // 编辑按钮
+
                 PhotosPicker(selection: $selectedItem, matching: .images) {
                     Image(systemName: "pencil.circle.fill")
                         .font(.system(size: 30))
@@ -227,7 +226,7 @@ struct TeamDetailView: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(activeTab == ["Players", "Matches", "Stats"].firstIndex(of: tab) ? .blue : .gray)
 
-                        // 下划线指示器
+
                         Rectangle()
                             .fill(activeTab == ["Players", "Matches", "Stats"].firstIndex(of: tab) ? Color.blue : Color.clear)
                             .frame(height: 3)
@@ -395,7 +394,7 @@ struct TeamDetailView: View {
     private var statsTabView: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // 整体统计
+
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Performance")
                         .font(.headline)
@@ -410,7 +409,7 @@ struct TeamDetailView: View {
 
                     if team.stats.totalMatches > 0 {
                         HStack {
-                            // 胜率图表
+
                             ZStack {
                                 Circle()
                                     .stroke(Color.gray.opacity(0.2), lineWidth: 10)
@@ -479,7 +478,6 @@ struct TeamDetailView: View {
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(15)
 
-                // 球员表现排名
                 if !teamPlayers.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Top Players")
@@ -572,16 +570,16 @@ struct TeamDetailView: View {
     }
 
     private func loadLogo(from urlString: String) {
-        // 检查是否是本地URL或远程URL
+
         if urlString.hasPrefix("file://") {
-            // 从本地存储加载
+
             if let image = LocalDataStore.shared.loadTeamLogo(from: urlString) {
                 DispatchQueue.main.async {
                     self.logoImage = image
                 }
             }
         } else {
-            // 从远程URL加载
+
             guard let url = URL(string: urlString) else { return }
 
             URLSession.shared.dataTask(with: url) { data, response, error in

@@ -71,7 +71,7 @@ class FirebaseService: ObservableObject {
         // Create a player with ID if it doesn't have one
         var updatedPlayer = player
 
-        // 强制生成新的唯一ID，确保不使用现有ID
+
         updatedPlayer.id = UUID().uuidString
 
         print("Adding player: \(updatedPlayer.name), position: \(updatedPlayer.position), ID: \(updatedPlayer.id ?? "none")")
@@ -84,7 +84,6 @@ class FirebaseService: ObservableObject {
 
         try await db.collection("matches").document(matchId).setData(from: updatedMatch)
 
-        // 打印更新后的球员列表和ID
         print("Updated player list: TeamA=\(updatedMatch.playersA.map { "\($0.name)" })")
         print("Updated player list: TeamB=\(updatedMatch.playersB.map { "\($0.name)" })")
 
@@ -201,12 +200,12 @@ class FirebaseService: ObservableObject {
     }
 
     func updatePlayerAvatar(playerId: String, imageData: Data) async throws -> String {
-        // 使用本地存储保存头像
+
         guard let avatarURL = LocalDataStore.shared.savePlayerAvatar(imageData: imageData, playerId: playerId) else {
             throw NSError(domain: "LocalStorageError", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to save avatar locally"])
         }
 
-        // 更新玩家资料中的头像URL
+
         if let profile = try await getPlayerProfile(id: playerId) {
             var updatedProfile = profile
             updatedProfile.avatarURL = avatarURL
@@ -259,12 +258,12 @@ class FirebaseService: ObservableObject {
     }
 
     func updateTeamLogo(teamId: String, imageData: Data) async throws -> String {
-        // 使用本地存储保存Logo
+
         guard let logoURL = LocalDataStore.shared.saveTeamLogo(imageData: imageData, teamId: teamId) else {
             throw NSError(domain: "LocalStorageError", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to save logo locally"])
         }
 
-        // 更新团队资料中的Logo URL
+
         if let team = try await getTeam(id: teamId) {
             var updatedTeam = team
             updatedTeam.logo = logoURL
@@ -279,15 +278,15 @@ class FirebaseService: ObservableObject {
     }
 
     func addPlayerToTeam(teamId: String, playerId: String) async throws {
-        // 将队员添加到本地存储
+
         LocalDataStore.shared.addPlayerToTeam(playerId: playerId, teamId: teamId)
 
-        // 更新Firebase中的Team数据，但只更新playerIds字段
+
         if let team = try await getTeam(id: teamId) {
-            // 使用本地存储中的playerIds来更新Team
+
             let playerIds = LocalDataStore.shared.getTeamPlayerIds(teamId: teamId)
 
-            // 合并本地存储和Firebase中的playerIds，避免覆盖Firebase中已有的ID
+
             var updatedTeam = team
             let allPlayerIds = Set(updatedTeam.playerIds).union(playerIds)
             updatedTeam.playerIds = Array(allPlayerIds)
@@ -297,18 +296,18 @@ class FirebaseService: ObservableObject {
     }
 
     func removePlayerFromTeam(teamId: String, playerId: String) async throws {
-        // 从本地存储中移除队员
+
         LocalDataStore.shared.removePlayerFromTeam(playerId: playerId, teamId: teamId)
 
-        // 从Firebase中更新Team数据
+
         if let team = try await getTeam(id: teamId) {
-            // 获取本地存储中剩余的playerIds
+
             let remainingPlayerIds = LocalDataStore.shared.getTeamPlayerIds(teamId: teamId)
 
             var updatedTeam = team
-            // 移除指定的玩家ID
+
             updatedTeam.playerIds.removeAll { $0 == playerId }
-            // 确保本地存储中的IDs也包含在内
+
             updatedTeam.playerIds = Array(Set(updatedTeam.playerIds).union(remainingPlayerIds))
 
             try await saveTeam(updatedTeam)
@@ -316,17 +315,16 @@ class FirebaseService: ObservableObject {
     }
 
     func getTeamPlayers(teamId: String) async throws -> [PlayerProfile] {
-        // 首先从本地存储获取团队玩家IDs
+
         let localPlayerIds = LocalDataStore.shared.getTeamPlayerIds(teamId: teamId)
 
-        // 再获取Firebase中存储的Team数据
+
         var allPlayerIds = localPlayerIds
         if let team = try await getTeam(id: teamId) {
-            // 合并本地和远程的玩家IDs
+
             allPlayerIds = Array(Set(allPlayerIds).union(team.playerIds))
         }
 
-        // 获取所有玩家的详细信息
         var players: [PlayerProfile] = []
         for playerId in allPlayerIds {
             if let player = try await getPlayerProfile(id: playerId) {

@@ -131,7 +131,7 @@ struct TeamRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // 队伍Logo
+
             if let logoURL = team.logo, !logoURL.isEmpty {
                 AsyncImage(url: URL(string: logoURL)) { image in
                     image

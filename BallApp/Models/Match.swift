@@ -38,7 +38,7 @@ struct Score: Codable {
 }
 
 struct Player: Identifiable, Codable, Hashable {
-    @DocumentID var id: String?
+    var id: String?
     var name: String
     var position: String
 
@@ -71,7 +71,7 @@ struct Player: Identifiable, Codable, Hashable {
 }
 
 struct MatchEvent: Identifiable, Codable, Hashable {
-    @DocumentID var id: String?
+    var id: String?
     var type: EventType
     var playerId: String
     var playerName: String
