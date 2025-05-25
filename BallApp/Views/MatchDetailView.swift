@@ -1,9 +1,4 @@
-//
-//  MatchDetailView.swift
-//  BallApp
-//
-//  Created by Cursor AI on 2025/5/24.
-//
+
 
 import SwiftUI
 
@@ -16,6 +11,7 @@ struct MatchDetailView: View {
     @State private var selectedTeamForPlayer: Bool = true // true for teamA, false for teamB
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var isSharePresented = false
 
     var body: some View {
         ScrollView {
@@ -29,6 +25,9 @@ struct MatchDetailView: View {
                 // Player lists
                 playersSection
 
+                // Score chart
+                scoreChartSection
+
                 // Match action records
                 eventsSection
             }
@@ -38,13 +37,21 @@ struct MatchDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if match.status == .inProgress {
+                HStack {
                     Button(action: {
-                        showingAddEvent = true
+                        isSharePresented = true
                     }) {
-                        Image(systemName: "plus.circle")
+                        Image(systemName: "square.and.arrow.up")
                     }
-                    .disabled(match.playersA.isEmpty || match.playersB.isEmpty)
+
+                    if match.status == .inProgress {
+                        Button(action: {
+                            showingAddEvent = true
+                        }) {
+                            Image(systemName: "plus.circle")
+                        }
+                        .disabled(match.playersA.isEmpty || match.playersB.isEmpty)
+                    }
                 }
             }
         }
@@ -81,6 +88,9 @@ struct MatchDetailView: View {
                 message: Text(errorMessage ?? "An unknown error occurred"),
                 dismissButton: .default(Text("OK"))
             )
+        }
+        .sheet(isPresented: $isSharePresented) {
+            ActivityView(activityItems: [createShareText()])
         }
         .overlay {
             if isLoading {
@@ -255,6 +265,65 @@ struct MatchDetailView: View {
         }
     }
 
+    private var scoreChartSection: some View {
+        VStack {
+            Text("Score Chart")
+                .font(.headline)
+                .foregroundColor(.secondary)
+                .padding(.bottom, 5)
+
+            if scoreEvents.count <= 1 {
+                Text("No score data available")
+                    .foregroundColor(.secondary)
+                    .padding()
+                    .frame(height: 200)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+            } else {
+                ScoreChartView(scoreEvents: scoreEvents, teamA: match.teamA, teamB: match.teamB)
+                    .frame(height: 200)
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+            }
+        }
+    }
+
+    // 处理比分事件数据
+    private var scoreEvents: [ScoreEvent] {
+        var events: [ScoreEvent] = []
+        var scoreA = 0
+        var scoreB = 0
+
+        // 添加初始点，比赛开始时的比分为 0-0
+        events.append(ScoreEvent(
+            timestamp: match.createdAt,
+            scoreA: 0,
+            scoreB: 0
+        ))
+
+        // 按时间顺序遍历事件
+        let sortedEvents = match.events
+            .filter { $0.type == .scorePoint }
+            .sorted { $0.timestamp < $1.timestamp }
+
+        for event in sortedEvents {
+            if event.teamId == match.teamA {
+                scoreA += 1
+            } else if event.teamId == match.teamB {
+                scoreB += 1
+            }
+
+            events.append(ScoreEvent(
+                timestamp: event.timestamp,
+                scoreA: scoreA,
+                scoreB: scoreB
+            ))
+        }
+
+        return events
+    }
+
     private var eventsSection: some View {
         VStack {
             Text("Match Records")
@@ -333,6 +402,81 @@ struct MatchDetailView: View {
                 self.errorMessage = "Failed to get match information: \(error.localizedDescription)"
             }
         }
+    }
+
+    private func createShareText() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+
+        let statusText: String
+        switch match.status {
+        case .created:
+            statusText = "Not Started"
+        case .inProgress:
+            statusText = "In Progress"
+        case .finished:
+            statusText = "Completed"
+        }
+
+        var shareText = """
+        Match Details: \(match.teamA) vs \(match.teamB)
+        Date: \(dateFormatter.string(from: match.createdAt))
+        Status: \(statusText)
+        Score: \(match.score.teamA) - \(match.score.teamB)
+
+        Teams:
+        """
+
+        // Add Team A players
+        shareText += "\n\n\(match.teamA):"
+        if match.playersA.isEmpty {
+            shareText += "\nNo players"
+        } else {
+            for (index, player) in match.playersA.enumerated() {
+                shareText += "\n\(index + 1). \(player.name) (\(player.position))"
+            }
+        }
+
+        // Add Team B players
+        shareText += "\n\n\(match.teamB):"
+        if match.playersB.isEmpty {
+            shareText += "\nNo players"
+        } else {
+            for (index, player) in match.playersB.enumerated() {
+                shareText += "\n\(index + 1). \(player.name) (\(player.position))"
+            }
+        }
+
+        // Add event records
+        shareText += "\n\nMatch Records:"
+        if match.events.isEmpty {
+            shareText += "\nNo records yet"
+        } else {
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "HH:mm:ss"
+
+            for event in match.events.sorted(by: { $0.timestamp > $1.timestamp }) {
+                let team = event.teamId == match.teamA ? match.teamA : match.teamB
+                let actionType: String
+                switch event.type {
+                case .serve:
+                    actionType = "Serve"
+                case .forehand:
+                    actionType = "Forehand"
+                case .backhand:
+                    actionType = "Backhand"
+                case .scorePoint:
+                    actionType = "Score"
+                case .error:
+                    actionType = "Error"
+                }
+
+                shareText += "\n\(timeFormatter.string(from: event.timestamp)) - \(event.playerName) (\(team)): \(actionType)"
+            }
+        }
+
+        return shareText
     }
 }
 
@@ -434,6 +578,236 @@ struct EventRow: View {
 
     private var teamColor: Color {
         return event.teamId == teamA ? .blue : .red
+    }
+}
+
+// 添加ActivityView用于分享功能
+struct ActivityView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    let applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: applicationActivities
+        )
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// 用于图表的比分事件数据结构
+struct ScoreEvent: Identifiable {
+    let id = UUID()
+    let timestamp: Date
+    let scoreA: Int
+    let scoreB: Int
+}
+
+// 比分折线图视图
+struct ScoreChartView: View {
+    let scoreEvents: [ScoreEvent]
+    let teamA: String
+    let teamB: String
+
+    @State private var showingDetailIndex: Int? = nil
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .topLeading) {
+                // 背景网格线
+                gridLines
+
+                // 团队A的折线和数据点
+                if scoreEvents.count > 1 {
+                    teamAPath(in: geometry)
+                }
+                teamAPoints(in: geometry)
+
+                // 团队B的折线和数据点
+                if scoreEvents.count > 1 {
+                    teamBPath(in: geometry)
+                }
+                teamBPoints(in: geometry)
+
+                // 图例
+                legendView
+
+                // 详情提示
+                detailTooltip(in: geometry)
+            }
+        }
+    }
+
+    // 网格线
+    private var gridLines: some View {
+        VStack(spacing: 0) {
+            ForEach(0..<5) { i in
+                Divider()
+                    .frame(height: 1)
+                if i < 4 {
+                    Spacer()
+                }
+            }
+        }
+        .foregroundColor(Color.gray.opacity(0.3))
+    }
+
+    // 团队A的折线
+    private func teamAPath(in geometry: GeometryProxy) -> some View {
+        Path { path in
+            let maxScore = maxScoreValue
+            let width = geometry.size.width
+            let height = geometry.size.height
+
+            // 计算点的位置
+            let points = scoreEvents.enumerated().map { (index, event) -> CGPoint in
+                let x = width * CGFloat(index) / CGFloat(max(scoreEvents.count - 1, 1))
+                let y = height - (height * CGFloat(event.scoreA) / CGFloat(max(maxScore, 1)))
+                return CGPoint(x: x, y: y)
+            }
+
+            // 绘制路径
+            if let firstPoint = points.first {
+                path.move(to: firstPoint)
+                for point in points.dropFirst() {
+                    path.addLine(to: point)
+                }
+            }
+        }
+        .stroke(Color.blue, lineWidth: 2)
+    }
+
+    // 团队A的数据点
+    private func teamAPoints(in geometry: GeometryProxy) -> some View {
+        ForEach(scoreEvents.indices, id: \.self) { index in
+            pointView(for: index, team: .a, in: geometry)
+        }
+    }
+
+    // 团队B的折线
+    private func teamBPath(in geometry: GeometryProxy) -> some View {
+        Path { path in
+            let maxScore = maxScoreValue
+            let width = geometry.size.width
+            let height = geometry.size.height
+
+            // 计算点的位置
+            let points = scoreEvents.enumerated().map { (index, event) -> CGPoint in
+                let x = width * CGFloat(index) / CGFloat(max(scoreEvents.count - 1, 1))
+                let y = height - (height * CGFloat(event.scoreB) / CGFloat(max(maxScore, 1)))
+                return CGPoint(x: x, y: y)
+            }
+
+            // 绘制路径
+            if let firstPoint = points.first {
+                path.move(to: firstPoint)
+                for point in points.dropFirst() {
+                    path.addLine(to: point)
+                }
+            }
+        }
+        .stroke(Color.red, lineWidth: 2)
+    }
+
+    // 团队B的数据点
+    private func teamBPoints(in geometry: GeometryProxy) -> some View {
+        ForEach(scoreEvents.indices, id: \.self) { index in
+            pointView(for: index, team: .b, in: geometry)
+        }
+    }
+
+    // 图例
+    private var legendView: some View {
+        HStack(spacing: 20) {
+            HStack {
+                Circle()
+                    .fill(Color.blue)
+                    .frame(width: 8, height: 8)
+                Text(teamA)
+                    .font(.caption)
+                    .foregroundColor(.blue)
+            }
+
+            HStack {
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 8, height: 8)
+                Text(teamB)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(6)
+        .background(Color.white.opacity(0.8))
+        .cornerRadius(4)
+        .padding(8)
+    }
+
+    // 详情提示
+    private func detailTooltip(in geometry: GeometryProxy) -> some View {
+        Group {
+            if let index = showingDetailIndex, scoreEvents.indices.contains(index) {
+                let event = scoreEvents[index]
+                let formatter = DateFormatter()
+              
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Time: \(formatter.string(from: event.timestamp))")
+                        .font(.caption)
+                    Text("\(teamA): \(event.scoreA)")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    Text("\(teamB): \(event.scoreB)")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+                .padding(6)
+                .background(Color.white)
+                .cornerRadius(6)
+                .shadow(radius: 2)
+                .position(
+                    x: geometry.size.width * CGFloat(index) / CGFloat(max(scoreEvents.count - 1, 1)),
+                    y: 40
+                )
+                .onTapGesture {
+                    showingDetailIndex = nil
+                }
+            }
+        }
+    }
+
+    // 枚举表示团队
+    private enum Team {
+        case a, b
+    }
+
+    // 单个数据点视图
+    private func pointView(for index: Int, team: Team, in geometry: GeometryProxy) -> some View {
+        let event = scoreEvents[index]
+        let maxScore = maxScoreValue
+        let width = geometry.size.width
+        let height = geometry.size.height
+
+        let score = team == .a ? event.scoreA : event.scoreB
+        let x = width * CGFloat(index) / CGFloat(max(scoreEvents.count - 1, 1))
+        let y = height - (height * CGFloat(score) / CGFloat(max(maxScore, 1)))
+
+        return Circle()
+            .fill(team == .a ? Color.blue : Color.red)
+            .frame(width: 8, height: 8)
+            .position(x: x, y: y)
+            .onTapGesture {
+                showingDetailIndex = index
+            }
+    }
+
+    // 计算最大分数，用于确定图表Y轴比例
+    private var maxScoreValue: Int {
+        let maxA = scoreEvents.map { $0.scoreA }.max() ?? 0
+        let maxB = scoreEvents.map { $0.scoreB }.max() ?? 0
+        return max(maxA, maxB, 1) // 确保至少为1，避免除以零
     }
 }
 

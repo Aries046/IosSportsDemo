@@ -1,9 +1,3 @@
-//
-//  Match.swift
-//  BallApp
-//
-//  Created by Cursor AI on 2025/5/24.
-//
 
 import Foundation
 import FirebaseFirestore

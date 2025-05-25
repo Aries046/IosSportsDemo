@@ -1,9 +1,4 @@
-//
-//  BallAppTests.swift
-//  BallAppTests
-//
-//  Created by 蒋熹煜 on 2025/5/24.
-//
+
 
 import Testing
 

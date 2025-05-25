@@ -1,9 +1,3 @@
-//
-//  ContentView.swift
-//  BallApp
-//
-//  Created by 蒋熹煜 on 2025/5/24.
-//
 
 import SwiftUI
 import FirebaseFirestore
@@ -22,7 +16,7 @@ struct ContentView: View {
         VStack {
                     if matches.isEmpty && !isLoading {
                         VStack(spacing: 20) {
-                            Image(systemName: "table.tennis.paddle.ball")
+                            Image(systemName: "trophy")
                                 .font(.system(size: 64))
                                 .foregroundColor(.blue)
 

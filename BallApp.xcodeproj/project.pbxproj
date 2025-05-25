@@ -13,6 +13,7 @@
 		16CD5B032DE1D5A2006EE77F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 16CD5B002DE1D5A2006EE77F /* GoogleService-Info.plist */; };
 		16CD5B192DE20A8C006EE77F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 16CD5B182DE20A8C006EE77F /* FirebaseFirestore */; };
 		16CD5B1B2DE20C37006EE77F /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 16CD5B1A2DE20C37006EE77F /* FirebaseFirestoreCombine-Community */; };
+		16CD5B652DE2E5DD006EE77F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 16CD5B642DE2E5DD006EE77F /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16CD5B1B2DE20C37006EE77F /* FirebaseFirestoreCombine-Community in Frameworks */,
+				16CD5B652DE2E5DD006EE77F /* FirebaseStorage in Frameworks */,
 				16CD5AF92DE1CFCC006EE77F /* FirebaseAnalytics in Frameworks */,
 				16CD5B192DE20A8C006EE77F /* FirebaseFirestore in Frameworks */,
 			);
@@ -137,6 +139,7 @@
 				16CD5AF82DE1CFCC006EE77F /* FirebaseAnalytics */,
 				16CD5B182DE20A8C006EE77F /* FirebaseFirestore */,
 				16CD5B1A2DE20C37006EE77F /* FirebaseFirestoreCombine-Community */,
+				16CD5B642DE2E5DD006EE77F /* FirebaseStorage */,
 			);
 			productName = BallApp;
 			productReference = 16CD5ACC2DE1BC75006EE77F /* BallApp.app */;
@@ -643,6 +646,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 16CD5AF72DE1CFCC006EE77F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = "FirebaseFirestoreCombine-Community";
+		};
+		16CD5B642DE2E5DD006EE77F /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 16CD5AF72DE1CFCC006EE77F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
